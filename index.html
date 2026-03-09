@@ -213,8 +213,8 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
     </div>
 
     <div class="main-grid">
-      <div class="card" id="cardLong">
-        <div class="card-title">LONGARINAS</div>
+      <div class="card" id="cardLong" style="border-color:rgba(0,212,255,.25);box-shadow:0 0 30px rgba(0,212,255,.05);">
+        <div class="card-title" style="color:#00d4ff;text-shadow:0 0 12px rgba(0,212,255,.4);">LONGARINAS</div>
         <div class="card-subtitle">Chapas Longas</div>
         <div class="gauge-container">
           <div class="gauge-wrap">
@@ -224,7 +224,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
               <div class="gauge-pct" id="pctLong">--</div>
             </div>
             <div class="gauge-estoque-box">
-              <span class="gauge-estoque" id="estoqueTextLong">ESTOQUE: -- t</span>
+              <span class="gauge-estoque" id="estoqueTextLong" style="border-color:rgba(0,212,255,.3);color:#e0eaff;">ESTOQUE: -- t</span>
             </div>
           </div>
           <div class="info-panel">
@@ -237,8 +237,8 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
         <div class="setor-status" id="statusLong">--</div>
       </div>
 
-      <div class="card" id="cardCurta">
-        <div class="card-title">CHAPAS CURTAS</div>
+      <div class="card" id="cardCurta" style="border-color:rgba(167,139,250,.25);box-shadow:0 0 30px rgba(167,139,250,.05);">
+        <div class="card-title" style="color:#a78bfa;text-shadow:0 0 12px rgba(167,139,250,.4);">CHAPAS CURTAS</div>
         <div class="card-subtitle">Peças Curtas</div>
         <div class="gauge-container">
           <div class="gauge-wrap">
@@ -248,7 +248,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
               <div class="gauge-pct" id="pctCurta">--</div>
             </div>
             <div class="gauge-estoque-box">
-              <span class="gauge-estoque" id="estoqueTextCurta">ESTOQUE: -- t</span>
+              <span class="gauge-estoque" id="estoqueTextCurta" style="border-color:rgba(167,139,250,.4);color:#e0eaff;">ESTOQUE: -- t</span>
             </div>
           </div>
           <div class="info-panel">
@@ -264,7 +264,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
 
     <div class="footer-kpi">
       <div class="kpi-card"><div class="kpi-label">Capacidade Total</div><div class="kpi-value" id="kpiCapTotal">-- t</div></div>
-      <div class="kpi-card"><div class="kpi-label">Ocupação Total</div><div class="kpi-value" id="kpiOcupTotal">-- t</div></div>
+      <div class="kpi-card" style="border-bottom:none;"><div class="kpi-label">Ocupação Total</div><div class="kpi-value" id="kpiOcupTotal" style="color:#a78bfa;text-shadow:0 0 16px rgba(167,139,250,.35);">-- t</div><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#a78bfa,transparent);"></div></div>
       <div class="kpi-card"><div class="kpi-label">Gargalos Identificados</div><div class="kpi-value" id="kpiGargalo" style="font-size:clamp(11px,1.3vw,17px)">--</div></div>
     </div>
 
@@ -649,13 +649,70 @@ function exibirConfig(){
   document.getElementById('cfgCurtaLim').value=CFG.curtaLim;
 }
 
+// Paletas por setor (normal / alerta / crítico)
+const PALETTE = {
+  long:  { normal:'#00ff88', alerta:'#ffcc00', critico:'#ff3333',
+            grad0:'#00d4ff', grad1:'#00ff88',  glow:'rgba(0,212,255,' },
+  curta: { normal:'#a78bfa', alerta:'#ffcc00', critico:'#ff3333',
+            grad0:'#c4b5fd', grad1:'#7c3aed',  glow:'rgba(167,139,250,' },
+};
+
+function getColorSector(st, sector) {
+  const p = PALETTE[sector];
+  return st==='critico'?p.critico:st==='alerta'?p.alerta:p.normal;
+}
+
+function drawGaugeSector(id, pct, color, sector) {
+  const p = PALETTE[sector];
+  const cv=document.getElementById(id); if(!cv)return;
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H-38, r=Math.min(W,H*1.4)*0.42;
+  const sa=Math.PI, arc=Math.min(Math.max(pct,0),1);
+  ctx.beginPath(); ctx.arc(cx,cy,r,sa,0); ctx.lineWidth=14;
+  ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.lineCap='round'; ctx.stroke();
+  if(arc>0.01){
+    const ea=sa+arc*Math.PI;
+    const g=ctx.createLinearGradient(cx+Math.cos(sa)*r,cy+Math.sin(sa)*r,cx+Math.cos(ea)*r,cy+Math.sin(ea)*r);
+    if(pct<0.6){
+      g.addColorStop(0, p.grad0); g.addColorStop(1, p.grad1);
+    } else if(pct<0.85){
+      g.addColorStop(0, p.grad0); g.addColorStop(.5,'#ffcc00'); g.addColorStop(1,'#ff8800');
+    } else {
+      g.addColorStop(0,'#ffaa00'); g.addColorStop(.5,'#ff5500'); g.addColorStop(1,'#ff1111');
+    }
+    ctx.beginPath(); ctx.arc(cx,cy,r,sa,ea); ctx.lineWidth=14;
+    ctx.strokeStyle=g; ctx.lineCap='round'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,cy,r,sa,ea); ctx.lineWidth=26;
+    ctx.strokeStyle=p.glow+'0.12)'; ctx.lineCap='round'; ctx.stroke();
+  }
+  [0,.25,.5,.75,1].forEach((t,i)=>{
+    const a=Math.PI+t*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*(r-18),cy+Math.sin(a)*(r-18));
+    ctx.lineTo(cx+Math.cos(a)*(r-8),cy+Math.sin(a)*(r-8));
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='8px Rajdhani'; ctx.textAlign='center';
+    ctx.fillText(['0','25','50','75','100'][i]+'%',cx+Math.cos(a)*(r-30),cy+Math.sin(a)*(r-30));
+  });
+  const na=Math.PI+arc*Math.PI, nx=cx+Math.cos(na)*(r-14), ny=cy+Math.sin(na)*(r-14);
+  ctx.shadowColor=color; ctx.shadowBlur=10;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny);
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.beginPath(); ctx.arc(cx,cy,6,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.shadowColor=color; ctx.shadowBlur=14; ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+}
+
 function animGauges(){
   animL.cur+=(animL.tgt-animL.cur)*0.045;
   animC.cur+=(animC.tgt-animC.cur)*0.045;
-  const colL=getColor(getStatus(CFG.longCap*(animL.tgt),CFG.longCap,CFG.longLim));
-  const colC=getColor(getStatus(CFG.curtaCap*(animC.tgt),CFG.curtaCap,CFG.curtaLim));
-  drawGauge('gaugeLong',animL.cur,colL);
-  drawGauge('gaugeCurta',animC.cur,colC);
+  const colL=getColorSector(getStatus(CFG.longCap*(animL.tgt),CFG.longCap,CFG.longLim),'long');
+  const colC=getColorSector(getStatus(CFG.curtaCap*(animC.tgt),CFG.curtaCap,CFG.curtaLim),'curta');
+  drawGaugeSector('gaugeLong', animL.cur, colL, 'long');
+  drawGaugeSector('gaugeCurta', animC.cur, colC, 'curta');
   requestAnimationFrame(animGauges);
 }
 
@@ -685,10 +742,12 @@ async function atualizarDashboard() {
 
   animL.tgt=pctL; animC.tgt=pctC;
 
+  const colLSect = getColorSector ? getColorSector(stL,'long') : colL;
+  const colCSect = getColorSector ? getColorSector(stC,'curta') : colC;
   document.getElementById('pctLong').textContent=Math.round(pctL*100)+'%';
-  document.getElementById('pctLong').style.color=colL;
+  document.getElementById('pctLong').style.color=colLSect;
   document.getElementById('pctCurta').textContent=Math.round(pctC*100)+'%';
-  document.getElementById('pctCurta').style.color=colC;
+  document.getElementById('pctCurta').style.color=colCSect;
   document.getElementById('estoqueTextLong').textContent='ESTOQUE: '+Number(longEst).toLocaleString('pt-BR')+' t';
   document.getElementById('estoqueTextCurta').textContent='ESTOQUE: '+Number(curtaEst).toLocaleString('pt-BR')+' t';
 
@@ -704,15 +763,28 @@ async function atualizarDashboard() {
   document.getElementById('alertLong').style.display=stL!=='normal'?'block':'none';
   document.getElementById('alertCurta').style.display=stC!=='normal'?'block':'none';
 
-  function applySetor(cardId,statusId,st){
+  function applySetor(cardId,statusId,st,sector){
     const sl=document.getElementById(statusId), cd=document.getElementById(cardId);
     sl.className='setor-status';
-    if(st==='normal'){sl.textContent='✔ SETOR LIBERADO';sl.classList.add('liberado');cd.className='card liberado';}
-    else if(st==='alerta'){sl.textContent='⚠ SETOR EM ATENÇÃO';sl.classList.add('atencao');cd.className='card';}
-    else{sl.textContent='✖ SETOR BLOQUEADO';sl.classList.add('bloqueado');cd.className='card bloqueado';}
+    const isLong = sector==='long';
+    const normColor = isLong ? 'rgba(0,212,255,' : 'rgba(167,139,250,';
+    const normText  = isLong ? '#00d4ff' : '#a78bfa';
+    if(st==='normal'){
+      sl.textContent='✔ SETOR LIBERADO';
+      sl.style.cssText=`background:${normColor}.08);color:${normText};border:1px solid ${normColor}.3);text-shadow:0 0 15px ${normColor}.5);`;
+      cd.className='card';
+      cd.style.borderColor=normColor+'0.35)';
+      cd.style.boxShadow=`0 0 35px ${normColor}0.08)`;
+    } else if(st==='alerta'){
+      sl.textContent='⚠ SETOR EM ATENÇÃO';sl.classList.add('atencao');
+      cd.className='card'; cd.style.borderColor=''; cd.style.boxShadow='';
+    } else {
+      sl.textContent='✖ SETOR BLOQUEADO';sl.classList.add('bloqueado');
+      cd.className='card bloqueado'; cd.style.borderColor=''; cd.style.boxShadow='';
+    }
   }
-  applySetor('cardLong','statusLong',stL);
-  applySetor('cardCurta','statusCurta',stC);
+  applySetor('cardLong','statusLong',stL,'long');
+  applySetor('cardCurta','statusCurta',stC,'curta');
 
   document.getElementById('kpiCapTotal').textContent=fmt((CFG.longEstMax||CFG.longCap)+(CFG.curtaEstMax||CFG.curtaCap));
   document.getElementById('kpiOcupTotal').textContent=fmt(longEst+curtaEst);
@@ -863,7 +935,7 @@ async function renderHistorico(){
     data:{
       labels,
       datasets:[
-        {label:'Longarinas',data:valsL,borderColor:'#00ff88',backgroundColor:'rgba(0,255,136,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00ff88',tension:.3,fill:true},
+        {label:'Longarinas',data:valsL,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00ff88',tension:.3,fill:true},
         {label:'Curtas',data:valsC,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00d4ff',tension:.3,fill:true},
         {label:'Cap. Física Long.',data:capLArr,borderColor:'rgba(255,150,0,.5)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
         {label:'Cap. Física Curtas',data:capCArr,borderColor:'rgba(0,212,255,.35)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
