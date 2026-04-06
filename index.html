@@ -48,8 +48,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .status-datetime{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--texto2);text-align:right;}
 
 /* MAIN GRID */
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
-@media(max-width:800px){.main-grid{grid-template-columns:1fr;}}
+.main-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1100px){.main-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.main-grid{grid-template-columns:1fr;}}
 .card{background:var(--panel);border:1px solid var(--borda);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:border-color .5s,box-shadow .5s;}
 .card.bloqueado{border-color:rgba(255,51,51,.5);box-shadow:0 0 40px rgba(255,51,51,.1);}
 .card.liberado{border-color:rgba(0,255,136,.4);box-shadow:0 0 40px rgba(0,255,136,.08);}
@@ -262,6 +263,31 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
       </div>
     </div>
 
+      <div class="card" id="cardDiversos" style="border-color:rgba(251,146,60,.25);box-shadow:0 0 30px rgba(251,146,60,.05);">
+        <div class="card-title" style="color:#fb923c;text-shadow:0 0 12px rgba(251,146,60,.4);">GALPÃO ANEXO</div>
+        <div class="card-subtitle">Diversos — Cap. 700 t</div>
+        <div class="gauge-container">
+          <div class="gauge-wrap">
+            <canvas id="gaugeDiversos" class="gauge-canvas" width="210" height="148"></canvas>
+            <div class="alert-tag" id="alertDiversos">⚠ ALERTA</div>
+            <div class="gauge-center-text">
+              <div class="gauge-pct" id="pctDiversos">--</div>
+            </div>
+            <div class="gauge-estoque-box">
+              <span class="gauge-estoque" id="estoqueTextDiversos" style="border-color:rgba(251,146,60,.3);color:#e0eaff;">ESTOQUE: -- t</span>
+            </div>
+          </div>
+          <div class="info-panel">
+            <div class="info-row"><span class="info-row-label">Cap. Física Máx.</span><span class="info-row-value" id="capDiversosEstMax">--</span></div>
+            <div class="info-row"><span class="info-row-label">Cap. Operacional</span><span class="info-row-value" id="capDiversosDisp">--</span></div>
+            <div class="info-row"><span class="info-row-label">Disponível</span><span class="info-row-value" id="dispDiversos">--</span></div>
+            <div class="info-row alerta"><span class="info-row-label">Limite Alerta</span><span class="info-row-value" id="limDiversos">--</span></div>
+          </div>
+        </div>
+        <div class="setor-status" id="statusDiversos">--</div>
+      </div>
+    </div>
+
     <div class="footer-kpi">
       <div class="kpi-card"><div class="kpi-label">Capacidade Total</div><div class="kpi-value" id="kpiCapTotal">-- t</div></div>
       <div class="kpi-card" style="border-bottom:none;"><div class="kpi-label">Ocupação Total</div><div class="kpi-value" id="kpiOcupTotal" style="color:#a78bfa;text-shadow:0 0 16px rgba(167,139,250,.35);">-- t</div><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#a78bfa,transparent);"></div></div>
@@ -321,6 +347,11 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
           <label>📦 Estoque Chapas Curtas (t)</label>
           <div class="sublabel">Quantidade atual em toneladas</div>
           <input type="number" id="inCurtaEstoque" class="ic" min="0" placeholder="ex: 1000">
+        </div>
+        <div class="input-field">
+          <label>🏭 Galpão Anexo / Diversos (t)</label>
+          <div class="sublabel">Quantidade atual em toneladas</div>
+          <input type="number" id="inDiversosEstoque" style="color:#fb923c;" min="0" placeholder="ex: 350">
         </div>
       </div>
 
@@ -419,6 +450,24 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
           <input type="number" id="cfgCurtaLim" class="ic" min="0">
         </div>
       </div>
+      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#fb923c;margin-bottom:14px;margin-top:20px;">🏭 GALPÃO ANEXO / DIVERSOS</div>
+      <div class="config-grid">
+        <div class="input-field">
+          <label>Cap. Física Máxima (t)</label>
+          <div class="sublabel">Capacidade real do galpão</div>
+          <input type="number" id="cfgDiversosEstMax" style="color:#fb923c;" min="1">
+        </div>
+        <div class="input-field">
+          <label>Cap. Operacional Máx. (t)</label>
+          <div class="sublabel">Limite operacional de trabalho</div>
+          <input type="number" id="cfgDiversosCap" style="color:#fb923c;" min="1">
+        </div>
+        <div class="input-field">
+          <label>Limite de Alerta (t)</label>
+          <div class="sublabel">Dispara alerta no dashboard</div>
+          <input type="number" id="cfgDiversosLim" style="color:#fb923c;" min="0">
+        </div>
+      </div>
       <button class="btn-salvar-cfg" onclick="salvarConfig()">💾 SALVAR CONFIGURAÇÕES</button>
 
       <div style="margin-top:24px;padding:16px;background:var(--panel2);border-radius:8px;border:1px solid var(--borda);">
@@ -464,7 +513,7 @@ if (!_CFG.SUPABASE_URL) {
     if(ls) ls.innerHTML += '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(255,0,0,.15);border:1px solid #ff3333;border-radius:8px;padding:12px 24px;color:#ff6666;font-family:monospace;font-size:12px;text-align:center;z-index:9999;">⚠ config.js não carregado — abra pelo loader.html</div>';
   });
 }
-let CFG = { longCap:700, longLim:600, longEstMax:700, curtaCap:1500, curtaLim:1400, curtaEstMax:1500 };
+let CFG = { longCap:700, longLim:600, longEstMax:700, curtaCap:1500, curtaLim:1400, curtaEstMax:1500, diversosCap:700, diversosLim:600, diversosEstMax:700 };
 let USUARIO_ID = null;
 
 function setSyncBadge(state, label) {
@@ -541,7 +590,8 @@ async function carregarConfig() {
     const { data } = await sb.from('configuracoes').select('*').eq('usuario_id', USUARIO_ID).single();
     if (data) {
       CFG = { longCap: data.long_cap, longLim: data.long_lim, longEstMax: data.long_est_max,
-              curtaCap: data.curta_cap, curtaLim: data.curta_lim, curtaEstMax: data.curta_est_max };
+              curtaCap: data.curta_cap, curtaLim: data.curta_lim, curtaEstMax: data.curta_est_max,
+              diversosCap: data.diversos_cap||700, diversosLim: data.diversos_lim||600, diversosEstMax: data.diversos_est_max||700 };
     }
   } catch(e) { /* usa defaults */ }
 }
@@ -591,7 +641,7 @@ function showTab(name) {
 // ============================================================
 // GAUGE (Velocímetro)
 // ============================================================
-let animL={cur:0,tgt:0}, animC={cur:0,tgt:0};
+let animL={cur:0,tgt:0}, animC={cur:0,tgt:0}, animD={cur:0,tgt:0};
 
 function drawGauge(id, pct, color) {
   const cv=document.getElementById(id); if(!cv)return;
@@ -647,6 +697,9 @@ function exibirConfig(){
   document.getElementById('cfgCurtaEstMax').value=CFG.curtaEstMax||CFG.curtaCap;
   document.getElementById('cfgCurtaCap').value=CFG.curtaCap;
   document.getElementById('cfgCurtaLim').value=CFG.curtaLim;
+  document.getElementById('cfgDiversosEstMax').value=CFG.diversosEstMax||CFG.diversosCap;
+  document.getElementById('cfgDiversosCap').value=CFG.diversosCap;
+  document.getElementById('cfgDiversosLim').value=CFG.diversosLim;
 }
 
 // Paletas por setor (normal / alerta / crítico)
@@ -655,6 +708,8 @@ const PALETTE = {
             grad0:'#00d4ff', grad1:'#00ff88',  glow:'rgba(0,212,255,' },
   curta: { normal:'#a78bfa', alerta:'#ffcc00', critico:'#ff3333',
             grad0:'#c4b5fd', grad1:'#7c3aed',  glow:'rgba(167,139,250,' },
+  diversos: { normal:'#fb923c', alerta:'#ffcc00', critico:'#ff3333',
+            grad0:'#fdba74', grad1:'#c2410c',  glow:'rgba(251,146,60,' },
 };
 
 function getColorSector(st, sector) {
@@ -709,10 +764,13 @@ function drawGaugeSector(id, pct, color, sector) {
 function animGauges(){
   animL.cur+=(animL.tgt-animL.cur)*0.045;
   animC.cur+=(animC.tgt-animC.cur)*0.045;
+  animD.cur+=(animD.tgt-animD.cur)*0.045;
   const colL=getColorSector(getStatus(CFG.longCap*(animL.tgt),CFG.longCap,CFG.longLim),'long');
   const colC=getColorSector(getStatus(CFG.curtaCap*(animC.tgt),CFG.curtaCap,CFG.curtaLim),'curta');
+  const colD=getColorSector(getStatus(CFG.diversosCap*(animD.tgt),CFG.diversosCap,CFG.diversosLim),'diversos');
   drawGaugeSector('gaugeLong', animL.cur, colL, 'long');
   drawGaugeSector('gaugeCurta', animC.cur, colC, 'curta');
+  drawGaugeSector('gaugeDiversos', animD.cur, colD, 'diversos');
   requestAnimationFrame(animGauges);
 }
 
@@ -720,7 +778,7 @@ function animGauges(){
 // DASHBOARD
 // ============================================================
 async function atualizarDashboard() {
-  let longEst = CFG.longCap*0.41, curtaEst = CFG.curtaCap*0.66;
+  let longEst = CFG.longCap*0.41, curtaEst = CFG.curtaCap*0.66, diversosEst = CFG.diversosCap*0.5;
   let ultimoReg = null;
   if (USUARIO_ID) {
     try {
@@ -730,6 +788,7 @@ async function atualizarDashboard() {
         ultimoReg = data[0];
         longEst = Number(data[0].long_estoque);
         curtaEst = Number(data[0].curta_estoque);
+        diversosEst = Number(data[0].diversos_estoque||0);
       }
     } catch(e) { console.error('Erro dashboard:', e.message); }
   }
@@ -740,16 +799,22 @@ async function atualizarDashboard() {
   const stC=getStatus(curtaEst,CFG.curtaCap,CFG.curtaLim);
   const colL=getColor(stL), colC=getColor(stC);
 
-  animL.tgt=pctL; animC.tgt=pctC;
+  const pctD=diversosEst/CFG.diversosCap;
+  const stD=getStatus(diversosEst,CFG.diversosCap,CFG.diversosLim);
+  animL.tgt=pctL; animC.tgt=pctC; animD.tgt=pctD;
 
   const colLSect = getColorSector ? getColorSector(stL,'long') : colL;
   const colCSect = getColorSector ? getColorSector(stC,'curta') : colC;
+  const colDSect = getColorSector ? getColorSector(stD,'diversos') : '#fb923c';
   document.getElementById('pctLong').textContent=Math.round(pctL*100)+'%';
   document.getElementById('pctLong').style.color=colLSect;
   document.getElementById('pctCurta').textContent=Math.round(pctC*100)+'%';
   document.getElementById('pctCurta').style.color=colCSect;
+  document.getElementById('pctDiversos').textContent=Math.round(pctD*100)+'%';
+  document.getElementById('pctDiversos').style.color=colDSect;
   document.getElementById('estoqueTextLong').textContent='ESTOQUE: '+Number(longEst).toLocaleString('pt-BR')+' t';
   document.getElementById('estoqueTextCurta').textContent='ESTOQUE: '+Number(curtaEst).toLocaleString('pt-BR')+' t';
+  document.getElementById('estoqueTextDiversos').textContent='ESTOQUE: '+Number(diversosEst).toLocaleString('pt-BR')+' t';
 
   document.getElementById('capLongEstMax').textContent=fmt(CFG.longEstMax||CFG.longCap);
   document.getElementById('capLongDisp').textContent=fmt(CFG.longCap);
@@ -759,16 +824,20 @@ async function atualizarDashboard() {
   document.getElementById('capCurtaDisp').textContent=fmt(CFG.curtaCap);
   document.getElementById('dispCurta').textContent=fmt(Math.max(CFG.curtaCap-curtaEst,0));
   document.getElementById('limCurta').textContent=fmt(CFG.curtaLim);
+  document.getElementById('capDiversosEstMax').textContent=fmt(CFG.diversosEstMax||CFG.diversosCap);
+  document.getElementById('capDiversosDisp').textContent=fmt(CFG.diversosCap);
+  document.getElementById('dispDiversos').textContent=fmt(Math.max(CFG.diversosCap-diversosEst,0));
+  document.getElementById('limDiversos').textContent=fmt(CFG.diversosLim);
 
   document.getElementById('alertLong').style.display=stL!=='normal'?'block':'none';
   document.getElementById('alertCurta').style.display=stC!=='normal'?'block':'none';
+  document.getElementById('alertDiversos').style.display=stD!=='normal'?'block':'none';
 
   function applySetor(cardId,statusId,st,sector){
     const sl=document.getElementById(statusId), cd=document.getElementById(cardId);
     sl.className='setor-status';
-    const isLong = sector==='long';
-    const normColor = isLong ? 'rgba(0,212,255,' : 'rgba(167,139,250,';
-    const normText  = isLong ? '#00d4ff' : '#a78bfa';
+    const NORM = {long:['rgba(0,212,255,','#00d4ff'], curta:['rgba(167,139,250,','#a78bfa'], diversos:['rgba(251,146,60,','#fb923c']};
+    const [normColor, normText] = NORM[sector]||NORM.long;
     if(st==='normal'){
       sl.textContent='✔ SETOR LIBERADO';
       sl.style.cssText=`background:${normColor}.08);color:${normText};border:1px solid ${normColor}.3);text-shadow:0 0 15px ${normColor}.5);`;
@@ -785,14 +854,16 @@ async function atualizarDashboard() {
   }
   applySetor('cardLong','statusLong',stL,'long');
   applySetor('cardCurta','statusCurta',stC,'curta');
+  applySetor('cardDiversos','statusDiversos',stD,'diversos');
 
-  document.getElementById('kpiCapTotal').textContent=fmt((CFG.longEstMax||CFG.longCap)+(CFG.curtaEstMax||CFG.curtaCap));
-  document.getElementById('kpiOcupTotal').textContent=fmt(longEst+curtaEst);
-  const pior=(stL==='critico'||stC==='critico')?'critico':(stL==='alerta'||stC==='alerta')?'alerta':'normal';
+  document.getElementById('kpiCapTotal').textContent=fmt((CFG.longEstMax||CFG.longCap)+(CFG.curtaEstMax||CFG.curtaCap)+(CFG.diversosEstMax||CFG.diversosCap));
+  document.getElementById('kpiOcupTotal').textContent=fmt(longEst+curtaEst+diversosEst);
+  const pior=(stL==='critico'||stC==='critico'||stD==='critico')?'critico':(stL==='alerta'||stC==='alerta'||stD==='alerta')?'alerta':'normal';
   const gEl=document.getElementById('kpiGargalo');
   const g=[];
   if(stL!=='normal')g.push('LONGARINAS');
   if(stC!=='normal')g.push('CURTAS');
+  if(stD!=='normal')g.push('DIVERSOS');
   gEl.textContent=g.length?g.join(' + '):'NENHUM';
   gEl.className='kpi-value '+(g.length?'dv':'dg');
 
@@ -815,7 +886,7 @@ async function atualizarDashboard() {
   if(ulEl){
     if(ultimoReg){
       const d = ultimoReg.data.split('-');
-      ulEl.textContent = `${d[2]}/${d[1]}/${d[0]} — L: ${fmt(ultimoReg.long_estoque)} C: ${fmt(ultimoReg.curta_estoque)}`;
+      ulEl.textContent = `${d[2]}/${d[1]}/${d[0]} — L: ${fmt(ultimoReg.long_estoque)} C: ${fmt(ultimoReg.curta_estoque)} D: ${fmt(ultimoReg.diversos_estoque||0)}`;
     } else {
       ulEl.textContent = 'Nenhum lançamento encontrado';
     }
@@ -831,23 +902,25 @@ async function lancarDado(){
   const ano=parseInt(document.getElementById('inAno').value);
   const longV=parseFloat(document.getElementById('inLongEstoque').value);
   const curtaV=parseFloat(document.getElementById('inCurtaEstoque').value);
+  const diversosV=parseFloat(document.getElementById('inDiversosEstoque').value)||0;
   if(!dia||isNaN(longV)||isNaN(curtaV)){showToast('⚠ Preencha todos os campos!',false);return;}
   if(longV<0||curtaV<0){showToast('⚠ Valores não podem ser negativos!',false);return;}
   const dataStr=`${ano}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
   setSyncBadge('syncing','⟳ SALVANDO');
   try {
     await sb.from('lancamentos').upsert({
-      usuario_id: USUARIO_ID, data: dataStr, long_estoque: longV, curta_estoque: curtaV
+      usuario_id: USUARIO_ID, data: dataStr, long_estoque: longV, curta_estoque: curtaV, diversos_estoque: diversosV
     },{ onConflict:'usuario_id,data' });
     setSyncBadge('ok','● ONLINE');
     document.getElementById('ultimoLanc').textContent=
-      `${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano} — L:${fmt(longV)} C:${fmt(curtaV)}`;
+      `${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano} — L:${fmt(longV)} C:${fmt(curtaV)} D:${fmt(diversosV)}`;
     const pctL=Math.round(longV/CFG.longCap*100);
     const pctC=Math.round(curtaV/CFG.curtaCap*100);
     document.getElementById('previewContent').innerHTML=
       `📅 Data: <span style="color:var(--azul)">${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</span><br>`+
       `🔩 Longarinas: <span style="color:#00ff88">${fmt(longV)}</span> → <span style="color:${getColor(getStatus(longV,CFG.longCap,CFG.longLim))}">${pctL}% ocupação</span><br>`+
-      `📦 Curtas: <span style="color:var(--azul)">${fmt(curtaV)}</span> → <span style="color:${getColor(getStatus(curtaV,CFG.curtaCap,CFG.curtaLim))}">${pctC}% ocupação</span>`;
+      `📦 Curtas: <span style="color:var(--azul)">${fmt(curtaV)}</span> → <span style="color:${getColor(getStatus(curtaV,CFG.curtaCap,CFG.curtaLim))}">${pctC}% ocupação</span><br>`+
+      `🏭 Diversos: <span style="color:#fb923c">${fmt(diversosV)}</span> → <span style="color:${getColor(getStatus(diversosV,CFG.diversosCap,CFG.diversosLim))}">${Math.round(diversosV/CFG.diversosCap*100)}% ocupação</span>`;
     document.getElementById('previewCard').style.display='block';
     showToast(`✔ Lançamento ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano} salvo no servidor!`);
     atualizarDashboard();
@@ -882,7 +955,7 @@ async function renderHistorico(){
   const inicio=`${ano}-${String(mes).padStart(2,'0')}-01`;
   const fim=`${ano}-${String(mes).padStart(2,'0')}-${String(ultimoDia).padStart(2,'0')}`;
 
-  const dias=[], valsL=[], valsC=[];
+  const dias=[], valsL=[], valsC=[], valsD=[];
 
   if(!USUARIO_ID){
     document.getElementById('tabelaHist').innerHTML='<div class="empty-state">Faça login para visualizar os dados.</div>';
@@ -898,6 +971,7 @@ async function renderHistorico(){
       dias.push(parseInt(r.data.split('-')[2]));
       valsL.push(Number(r.long_estoque));
       valsC.push(Number(r.curta_estoque));
+      valsD.push(Number(r.diversos_estoque||0));
     });
     setSyncBadge('ok','● ONLINE');
   } catch(e){
@@ -916,6 +990,8 @@ async function renderHistorico(){
   // Stats
   const maxL=Math.max(...valsL),minL=Math.min(...valsL),avgL=valsL.reduce((a,b)=>a+b,0)/valsL.length;
   const maxC=Math.max(...valsC),minC=Math.min(...valsC),avgC=valsC.reduce((a,b)=>a+b,0)/valsC.length;
+  const maxD=Math.max(...valsD),minD=Math.min(...valsD);
+  const valsTotal=dias.map((_,i)=>valsL[i]+valsC[i]+valsD[i]);
   document.getElementById('hMaxL').textContent=fmt(maxL);
   document.getElementById('hMinL').textContent=fmt(minL);
   document.getElementById('hAvgL').textContent=fmt(Math.round(avgL));
@@ -936,7 +1012,9 @@ async function renderHistorico(){
       labels,
       datasets:[
         {label:'Longarinas',data:valsL,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00ff88',tension:.3,fill:true},
-        {label:'Curtas',data:valsC,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00d4ff',tension:.3,fill:true},
+        {label:'Curtas',data:valsC,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#a78bfa',tension:.3,fill:true},
+        {label:'Galpão Anexo/Diversos',data:valsD,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#fb923c',tension:.3,fill:true},
+        {label:'Total Geral',data:valsTotal,borderColor:'#ffffff',backgroundColor:'rgba(255,255,255,.04)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ffffff',tension:.3,fill:false,borderDash:[4,2]},
         {label:'Cap. Física Long.',data:capLArr,borderColor:'rgba(255,150,0,.5)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
         {label:'Cap. Física Curtas',data:capCArr,borderColor:'rgba(0,212,255,.35)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
       ]
@@ -961,22 +1039,26 @@ async function renderHistorico(){
 
   // Tabela
   const rowsL=valsL, rowsC=valsC;
-  let html='<table><thead><tr><th>DIA</th><th>LONGARINAS</th><th>% LONG</th><th>STATUS LONG</th><th>CURTAS</th><th>% CURTAS</th><th>STATUS CURTAS</th></tr></thead><tbody>';
+  let html='<table><thead><tr><th>DIA</th><th>LONGARINAS</th><th>% LONG</th><th>ST L</th><th>CURTAS</th><th>% C</th><th>ST C</th><th>DIVERSOS</th><th>% D</th><th>TOTAL</th></tr></thead><tbody>';
   dias.forEach((d,i)=>{
-    const l=valsL[i],c=valsC[i];
-    const pL=Math.round(l/CFG.longCap*100), pC=Math.round(c/CFG.curtaCap*100);
-    const sL=getStatus(l,CFG.longCap,CFG.longLim), sC=getStatus(c,CFG.curtaCap,CFG.curtaLim);
-    const badgeL=sL==='normal'?'<span class="badge ok">NORMAL</span>':sL==='alerta'?'<span class="badge at">ATENÇÃO</span>':'<span class="badge cr">CRÍTICO</span>';
-    const badgeC=sC==='normal'?'<span class="badge ok">NORMAL</span>':sC==='alerta'?'<span class="badge at">ATENÇÃO</span>':'<span class="badge cr">CRÍTICO</span>';
+    const l=valsL[i],c=valsC[i],dv=valsD[i],tot=l+c+dv;
+    const pL=Math.round(l/CFG.longCap*100), pC=Math.round(c/CFG.curtaCap*100), pD=Math.round(dv/CFG.diversosCap*100);
+    const sL=getStatus(l,CFG.longCap,CFG.longLim), sC=getStatus(c,CFG.curtaCap,CFG.curtaLim), sD=getStatus(dv,CFG.diversosCap,CFG.diversosLim);
+    const badgeL=sL==='normal'?'<span class="badge ok">OK</span>':sL==='alerta'?'<span class="badge at">ATE</span>':'<span class="badge cr">CRIT</span>';
+    const badgeC=sC==='normal'?'<span class="badge ok">OK</span>':sC==='alerta'?'<span class="badge at">ATE</span>':'<span class="badge cr">CRIT</span>';
     const colL2=sL==='normal'?'verde':sL==='alerta'?'amarelo':'vermelho';
     const colC2=sC==='normal'?'verde':sC==='alerta'?'amarelo':'vermelho';
+    const colD2=sD==='normal'?'verde':sD==='alerta'?'amarelo':'vermelho';
     const isMaxL=l===maxL?' ★':'', isMinL=l===minL?' ▼':'';
     const isMaxC=c===maxC?' ★':'', isMinC=c===minC?' ▼':'';
     html+=`<tr><td class="destaque">${String(d).padStart(2,'0')}</td>
       <td class="${colL2}">${fmtN(l)} t${isMaxL}${isMinL}</td>
       <td class="${colL2}">${pL}%</td><td>${badgeL}</td>
       <td class="${colC2}">${fmtN(c)} t${isMaxC}${isMinC}</td>
-      <td class="${colC2}">${pC}%</td><td>${badgeC}</td></tr>`;
+      <td class="${colC2}">${pC}%</td><td>${badgeC}</td>
+      <td class="${colD2}">${fmtN(dv)} t</td>
+      <td class="${colD2}">${pD}%</td>
+      <td class="destaque">${fmtN(tot)} t</td></tr>`;
   });
   html+='</tbody></table><div style="font-size:10px;color:var(--texto2);margin-top:10px;font-family:Share Tech Mono,monospace">★ Máximo do mês &nbsp;|&nbsp; ▼ Mínimo do mês</div>';
   document.getElementById('tabelaHist').innerHTML=html;
@@ -993,12 +1075,16 @@ async function salvarConfig(){
   CFG.curtaEstMax=parseFloat(document.getElementById('cfgCurtaEstMax').value)||1500;
   CFG.curtaCap=parseFloat(document.getElementById('cfgCurtaCap').value)||1500;
   CFG.curtaLim=parseFloat(document.getElementById('cfgCurtaLim').value)||1400;
+  CFG.diversosEstMax=parseFloat(document.getElementById('cfgDiversosEstMax').value)||700;
+  CFG.diversosCap=parseFloat(document.getElementById('cfgDiversosCap').value)||700;
+  CFG.diversosLim=parseFloat(document.getElementById('cfgDiversosLim').value)||600;
   setSyncBadge('syncing','⟳ SALVANDO');
   try {
     await sb.from('configuracoes').upsert({
       usuario_id: USUARIO_ID,
       long_cap: CFG.longCap, long_lim: CFG.longLim, long_est_max: CFG.longEstMax,
       curta_cap: CFG.curtaCap, curta_lim: CFG.curtaLim, curta_est_max: CFG.curtaEstMax,
+      diversos_cap: CFG.diversosCap, diversos_lim: CFG.diversosLim, diversos_est_max: CFG.diversosEstMax,
       atualizado_em: new Date().toISOString()
     },{ onConflict:'usuario_id' });
     setSyncBadge('ok','● ONLINE');
