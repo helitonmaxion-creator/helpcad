@@ -216,7 +216,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
     <div class="main-grid">
       <div class="card" id="cardLong" style="border-color:rgba(0,212,255,.25);box-shadow:0 0 30px rgba(0,212,255,.05);">
         <div class="card-title" style="color:#00d4ff;text-shadow:0 0 12px rgba(0,212,255,.4);">LONGARINAS</div>
-        <div class="card-subtitle">Chapas Longas</div>
+        <div class="card-subtitle">Chapas &gt; 4000mm</div>
         <div class="gauge-container">
           <div class="gauge-wrap">
             <canvas id="gaugeLong" class="gauge-canvas" width="210" height="148"></canvas>
@@ -240,7 +240,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
 
       <div class="card" id="cardCurta" style="border-color:rgba(167,139,250,.25);box-shadow:0 0 30px rgba(167,139,250,.05);">
         <div class="card-title" style="color:#a78bfa;text-shadow:0 0 12px rgba(167,139,250,.4);">CHAPAS CURTAS</div>
-        <div class="card-subtitle">Peças Curtas</div>
+        <div class="card-subtitle">Chapas &lt; 4000mm</div>
         <div class="gauge-container">
           <div class="gauge-wrap">
             <canvas id="gaugeCurta" class="gauge-canvas" width="210" height="148"></canvas>
@@ -261,11 +261,10 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
         </div>
         <div class="setor-status" id="statusCurta">--</div>
       </div>
-    </div>
 
       <div class="card" id="cardDiversos" style="border-color:rgba(251,146,60,.25);box-shadow:0 0 30px rgba(251,146,60,.05);">
-        <div class="card-title" style="color:#fb923c;text-shadow:0 0 12px rgba(251,146,60,.4);">GALPÃO ANEXO</div>
-        <div class="card-subtitle">Diversos — Cap. 700 t</div>
+        <div class="card-title" style="color:#fb923c;text-shadow:0 0 12px rgba(251,146,60,.4);">COMPONENTES ESTRUTURAIS</div>
+        <div class="card-subtitle">Peças Diversas</div>
         <div class="gauge-container">
           <div class="gauge-wrap">
             <canvas id="gaugeDiversos" class="gauge-canvas" width="210" height="148"></canvas>
@@ -349,7 +348,7 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
           <input type="number" id="inCurtaEstoque" class="ic" min="0" placeholder="ex: 1000">
         </div>
         <div class="input-field">
-          <label>🏭 Galpão Anexo / Diversos (t)</label>
+          <label>🏭 Componentes Estruturais / Peças Diversas (t)</label>
           <div class="sublabel">Quantidade atual em toneladas</div>
           <input type="number" id="inDiversosEstoque" style="color:#fb923c;" min="0" placeholder="ex: 350">
         </div>
@@ -450,11 +449,11 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
           <input type="number" id="cfgCurtaLim" class="ic" min="0">
         </div>
       </div>
-      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#fb923c;margin-bottom:14px;margin-top:20px;">🏭 GALPÃO ANEXO / DIVERSOS</div>
+      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#fb923c;margin-bottom:14px;margin-top:20px;">🏭 COMPONENTES ESTRUTURAIS / PEÇAS DIVERSAS</div>
       <div class="config-grid">
         <div class="input-field">
           <label>Cap. Física Máxima (t)</label>
-          <div class="sublabel">Capacidade real do galpão</div>
+          <div class="sublabel">Capacidade real dos componentes</div>
           <input type="number" id="cfgDiversosEstMax" style="color:#fb923c;" min="1">
         </div>
         <div class="input-field">
@@ -477,7 +476,8 @@ td.destaque{font-family:'Orbitron',monospace;font-weight:700;}
           2. <span style="color:var(--azul)">DASHBOARD</span> → Atualizado automaticamente com o último lançamento<br>
           3. <span style="color:var(--amarelo)">HISTÓRICO</span> → Selecione o mês/ano para ver gráfico e tabela completa<br>
           4. <span style="color:var(--texto2)">CONFIGURAÇÕES</span> → Ajuste capacidade máxima e limites de alerta<br>
-          5. <span style='color:#00ff88'>SERVIDOR</span> → Dados salvos no Supabase — seguros em nuvem
+          5. <span style='color:#00ff88'>SERVIDOR</span> → Dados salvos no Supabase — seguros em nuvem<br>
+          6. <span style="color:#fb923c">COMPONENTES ESTRUTURAIS</span> → Substitui o conceito de Galpão Anexo
         </div>
       </div>
 
@@ -920,7 +920,7 @@ async function lancarDado(){
       `📅 Data: <span style="color:var(--azul)">${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</span><br>`+
       `🔩 Longarinas: <span style="color:#00ff88">${fmt(longV)}</span> → <span style="color:${getColor(getStatus(longV,CFG.longCap,CFG.longLim))}">${pctL}% ocupação</span><br>`+
       `📦 Curtas: <span style="color:var(--azul)">${fmt(curtaV)}</span> → <span style="color:${getColor(getStatus(curtaV,CFG.curtaCap,CFG.curtaLim))}">${pctC}% ocupação</span><br>`+
-      `🏭 Diversos: <span style="color:#fb923c">${fmt(diversosV)}</span> → <span style="color:${getColor(getStatus(diversosV,CFG.diversosCap,CFG.diversosLim))}">${Math.round(diversosV/CFG.diversosCap*100)}% ocupação</span>`;
+      `🏭 Comp. Estruturais: <span style="color:#fb923c">${fmt(diversosV)}</span> → <span style="color:${getColor(getStatus(diversosV,CFG.diversosCap,CFG.diversosLim))}">${Math.round(diversosV/CFG.diversosCap*100)}% ocupação</span>`;
     document.getElementById('previewCard').style.display='block';
     showToast(`✔ Lançamento ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano} salvo no servidor!`);
     atualizarDashboard();
@@ -1013,7 +1013,7 @@ async function renderHistorico(){
       datasets:[
         {label:'Longarinas',data:valsL,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00ff88',tension:.3,fill:true},
         {label:'Curtas',data:valsC,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#a78bfa',tension:.3,fill:true},
-        {label:'Galpão Anexo/Diversos',data:valsD,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#fb923c',tension:.3,fill:true},
+        {label:'Comp. Estruturais',data:valsD,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#fb923c',tension:.3,fill:true},
         {label:'Total Geral',data:valsTotal,borderColor:'#ffffff',backgroundColor:'rgba(255,255,255,.04)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ffffff',tension:.3,fill:false,borderDash:[4,2]},
         {label:'Cap. Física Long.',data:capLArr,borderColor:'rgba(255,150,0,.5)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
         {label:'Cap. Física Curtas',data:capCArr,borderColor:'rgba(0,212,255,.35)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,fill:false},
